@@ -9,4 +9,4 @@ RUN dotnet publish -c Release -o /app
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine3.10 AS final 
 WORKDIR /app
 COPY --from=build /app .
-ENTRYPOINT ["dotnet", "ApiToCatalog.dll"]
+ENTRYPOINT ["dotnet", "apitocatalog.dll"]
