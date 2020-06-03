@@ -35,7 +35,7 @@ namespace apitocatalog.Controllers
                 {
                     var request = new HttpRequestMessage();
                     request.Method = new HttpMethod("Get");
-                    request.RequestUri = new Uri(def.ApiManagerHost + "/api/portal/v1.2/organizations");
+                    request.RequestUri = new Uri("https://" + def.ApiManagerHost + ":8075/api/portal/v1.2/organizations");
                     String encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(def.ApiAdminUsername + ":" + def.ApiAdminPassword));
                     request.Headers.Add("Authorization", "Basic " + encoded);
 
@@ -60,7 +60,7 @@ namespace apitocatalog.Controllers
                     {
                         var request = new HttpRequestMessage();
                         request.Method = new HttpMethod("Post");
-                        request.RequestUri = new Uri(def.ApiManagerHost + "/api/portal/v1.2/apirepo/importFromUrl");
+                        request.RequestUri = new Uri("https://" + def.ApiManagerHost + ":8075/api/portal/v1.2/apirepo/importFromUrl");
                         String encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(def.ApiAdminUsername + ":" + def.ApiAdminPassword));
                         request.Headers.Add("Authorization", "Basic " + encoded);
                         var postdata = new Dictionary<string, string> {
