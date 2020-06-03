@@ -31,22 +31,26 @@ namespace apitocatalog.Controllers
                 // get Organization Id 
                 // if Organization not found, use API Development 
                 string OrgId = string.Empty;
-                using (var httpClient = new HttpClient())
+                using (var httpClientHandler = new HttpClientHandler())
                 {
-                    var request = new HttpRequestMessage();
-                    request.Method = new HttpMethod("Get");
-                    request.RequestUri = new Uri("https://" + def.ApiManagerHost + ":8075/api/portal/v1.2/organizations");
-                    String encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(def.ApiAdminUsername + ":" + def.ApiAdminPassword));
-                    request.Headers.Add("Authorization", "Basic " + encoded);
-
-                    using (var response = await httpClient.SendAsync(request))
+                    httpClientHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                    using (var httpClient = new HttpClient())
                     {
-                        string apiResponse = await response.Content.ReadAsStringAsync();
-                        var organizations = JsonConvert.DeserializeObject<List<Organization>>(apiResponse);
-                        if (organizations != null && organizations.Count() > 0)
+                        var request = new HttpRequestMessage();
+                        request.Method = new HttpMethod("Get");
+                        request.RequestUri = new Uri("https://" + def.ApiManagerHost + ":8075/api/portal/v1.2/organizations");
+                        String encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(def.ApiAdminUsername + ":" + def.ApiAdminPassword));
+                        request.Headers.Add("Authorization", "Basic " + encoded);
+
+                        using (var response = await httpClient.SendAsync(request))
                         {
-                            OrgId = organizations.FirstOrDefault().Id.ToString();
-                            _logger.LogInformation("Organization found - Id " + OrgId);
+                            string apiResponse = await response.Content.ReadAsStringAsync();
+                            var organizations = JsonConvert.DeserializeObject<List<Organization>>(apiResponse);
+                            if (organizations != null && organizations.Count() > 0)
+                            {
+                                OrgId = organizations.FirstOrDefault().Id.ToString();
+                                _logger.LogInformation("Organization found - Id " + OrgId);
+                            }
                         }
                     }
                 }
@@ -55,27 +59,30 @@ namespace apitocatalog.Controllers
                 {
 
                     // add api as backend api  
-
-                    using (var httpClient = new HttpClient())
+                    using (var httpClientHandler = new HttpClientHandler())
                     {
-                        var request = new HttpRequestMessage();
-                        request.Method = new HttpMethod("Post");
-                        request.RequestUri = new Uri("https://" + def.ApiManagerHost + ":8075/api/portal/v1.2/apirepo/importFromUrl");
-                        String encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(def.ApiAdminUsername + ":" + def.ApiAdminPassword));
-                        request.Headers.Add("Authorization", "Basic " + encoded);
-                        var postdata = new Dictionary<string, string> {
-                        {"organizationId", OrgId},
-                        {"name", def.ApiName},
-                        {"type", "swagger"},
-                        {"url", def.SwaggerURL}
-                    };
-                        request.Content = new FormUrlEncodedContent(postdata);
-
-                        using (var response = await httpClient.SendAsync(request))
+                        httpClientHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                        using (var httpClient = new HttpClient())
                         {
-                            if (response.IsSuccessStatusCode)
-                            { _logger.LogInformation("API added in the catalog"); }
-                            else { _logger.LogError("Error occurred while adding API in the catalog" + response.Content); }
+                            var request = new HttpRequestMessage();
+                            request.Method = new HttpMethod("Post");
+                            request.RequestUri = new Uri("https://" + def.ApiManagerHost + ":8075/api/portal/v1.2/apirepo/importFromUrl");
+                            String encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(def.ApiAdminUsername + ":" + def.ApiAdminPassword));
+                            request.Headers.Add("Authorization", "Basic " + encoded);
+                            var postdata = new Dictionary<string, string> {
+                                {"organizationId", OrgId},
+                                {"name", def.ApiName},
+                                {"type", "swagger"},
+                                {"url", def.SwaggerURL}
+                            };
+                            request.Content = new FormUrlEncodedContent(postdata);
+
+                            using (var response = await httpClient.SendAsync(request))
+                            {
+                                if (response.IsSuccessStatusCode)
+                                { _logger.LogInformation("API added in the catalog"); }
+                                else { _logger.LogError("Error occurred while adding API in the catalog" + response.Content); }
+                            }
                         }
                     }
                 }
