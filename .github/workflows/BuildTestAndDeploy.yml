@@ -27,7 +27,7 @@ jobs:
   # Push image to Dockerhub Repo.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
-    
+    needs: build
     runs-on: ubuntu-latest
     
     steps:
@@ -63,6 +63,7 @@ jobs:
   
   # Deploy container 
   deploy: 
+    needs: push
     runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
