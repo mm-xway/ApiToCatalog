@@ -23,3 +23,64 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --verbosity normal
+
+  # Push image to Dockerhub Repo.
+  # See also https://docs.docker.com/docker-hub/builds/
+  push:
+    # Ensure test job passes before pushing image.
+    needs: build
+
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: docker build . --file Dockerfile --tag apitocatalog
+
+      - name: Log into registry
+        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID=mihirmone/apitocatalog
+          
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+
+          docker tag apitocatalog $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+  
+  # Deploy container 
+  deploy: 
+    # Requires push step to finish
+    needs: push
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    - name: Run SSH command
+      uses: garygrossgarten/github-action-ssh@v0.5.0
+      with:
+        # Command to execute on the remote server.
+        command: sh /datadrive/utility/pull-and-run-apitocatalogapp.sh
+        # Hostname or IP address of the server.
+        host: ${{ secrets.DOCKERHOST }}
+        # Username for authentication.
+        username: ${{ secrets.DOCKERHOST_USERNAME }}
+        password: ${{ secrets.DOCKERHOST_PASSWORD }}
