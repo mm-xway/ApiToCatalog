@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -29,6 +30,11 @@ namespace apitocatalog
             services.AddControllers();
             services.Configure<KestrelServerOptions>(Configuration.GetSection("Kestrel"));
             services.AddOpenApiDocument(document => document.DocumentName = document.Title = "ApiToCatalog Service");
+            services.AddHttpClient("HttpClientWithUntrustedSSL").ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                ServerCertificateCustomValidationCallback = (requestmessage, cert, chain, policy) => { return true; }
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
