@@ -56,6 +56,7 @@ namespace apitocatalog.Controllers
                 using (var response = await httpClient.SendAsync(request))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
+                    _logger.LogInformation("received API response -" + apiResponse);
                     var organizations = JsonConvert.DeserializeObject<List<Organization>>(apiResponse);
                     if (organizations != null && organizations.Count() > 0)
                     {
@@ -68,25 +69,25 @@ namespace apitocatalog.Controllers
                 {
 
                     //add api as backend api  
-                    httpClient = _clientFactory.CreateClient("HttpClientWithUntrustedSSL");
-                    var request2 = new HttpRequestMessage();
-                    request.Method = new HttpMethod("Post");
-                    request.RequestUri = new Uri("https://" + def.ApiManagerHost + ":8075/api/portal/v1.2/apirepo/importFromUrl");
-                    request.Headers.Add("Authorization", "Basic " + encoded);
-                    var postdata = new Dictionary<string, string> {
-                                {"organizationId", OrgId},
-                                {"name", def.ApiName},
-                                {"type", "swagger"},
-                                {"url", def.SwaggerURL}
-                            };
-                    request.Content = new FormUrlEncodedContent(postdata);
+                    // httpClient = _clientFactory.CreateClient("HttpClientWithUntrustedSSL");
+                    // var request2 = new HttpRequestMessage();
+                    // request.Method = new HttpMethod("Post");
+                    // request.RequestUri = new Uri("https://" + def.ApiManagerHost + ":8075/api/portal/v1.2/apirepo/importFromUrl");
+                    // request.Headers.Add("Authorization", "Basic " + encoded);
+                    // var postdata = new Dictionary<string, string> {
+                    //             {"organizationId", OrgId},
+                    //             {"name", def.ApiName},
+                    //             {"type", "swagger"},
+                    //             {"url", def.SwaggerURL}
+                    //         };
+                    // request.Content = new FormUrlEncodedContent(postdata);
 
-                    using (var response = await httpClient.SendAsync(request))
-                    {
-                        if (response.IsSuccessStatusCode)
-                        { _logger.LogInformation("API added in the catalog"); }
-                        else { _logger.LogError("Error occurred while adding API in the catalog" + response.Content); }
-                    }
+                    // using (var response = await httpClient.SendAsync(request))
+                    // {
+                    //     if (response.IsSuccessStatusCode)
+                    //     { _logger.LogInformation("API added in the catalog"); }
+                    //     else { _logger.LogError("Error occurred while adding API in the catalog" + response.Content); }
+                    // }
 
                 }
                 else
