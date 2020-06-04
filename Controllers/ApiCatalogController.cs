@@ -70,18 +70,18 @@ namespace apitocatalog.Controllers
                     //add api as backend api  
                     httpClient = _clientFactory.CreateClient("HttpClientWithUntrustedSSL");
                     var request2 = new HttpRequestMessage();
-                    request.Method = new HttpMethod("Post");
-                    request.RequestUri = new Uri("https://" + def.ApiManagerHost + ":8075/api/portal/v1.2/apirepo/importFromUrl");
-                    request.Headers.Add("Authorization", "Basic " + encoded);
+                    request2.Method = new HttpMethod("Post");
+                    request2.RequestUri = new Uri("https://" + def.ApiManagerHost + ":8075/api/portal/v1.2/apirepo/importFromUrl");
+                    request2.Headers.Add("Authorization", "Basic " + encoded);
                     var postdata = new Dictionary<string, string> {
                                 {"organizationId", OrgId},
                                 {"name", def.ApiName},
                                 {"type", "swagger"},
                                 {"url", def.SwaggerURL}
                             };
-                    request.Content = new FormUrlEncodedContent(postdata);
+                    request2.Content = new FormUrlEncodedContent(postdata);
 
-                    using (var response = await httpClient.SendAsync(request))
+                    using (var response = await httpClient.SendAsync(request2))
                     {
                         if (response.IsSuccessStatusCode)
                         { _logger.LogInformation("API added in the catalog"); }
