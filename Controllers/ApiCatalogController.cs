@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace apitocatalog.Controllers
 {
@@ -40,8 +41,17 @@ namespace apitocatalog.Controllers
 
                 var request = new HttpRequestMessage();
                 request.Method = new HttpMethod("Get");
-                request.RequestUri = new Uri("https://" + def.ApiManagerHost + ":8075/api/portal/v1.2/organizations");
+                StringBuilder orgURL = new StringBuilder();
+                orgURL.Append("https://"); 
+                orgURL.Append(def.ApiManagerHost);
+                orgURL.Append(":8075/api/portal/v1.2/organizations");
                 request.Headers.Add("Authorization", "Basic " + encoded);
+                if (!String.IsNullOrWhiteSpace(def.OrganizationName))
+                {
+                    orgURL.Append("?field=name&op=Like&value=");
+                    orgURL.Append(def.OrganizationName);
+                }
+                request.RequestUri = new Uri(orgURL.ToString());
 
                 using (var response = await httpClient.SendAsync(request))
                 {
@@ -57,7 +67,7 @@ namespace apitocatalog.Controllers
                 if (!String.IsNullOrWhiteSpace(OrgId))
                 {
 
-                    // add api as backend api  
+                    //add api as backend api  
                     httpClient = _clientFactory.CreateClient("HttpClientWithUntrustedSSL");
                     var request2 = new HttpRequestMessage();
                     request.Method = new HttpMethod("Post");
